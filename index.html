@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>辉斌大战</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --gold: #FFD700;
+    --dark-gold: #B8860B;
+    --red: #C0392B;
+    --dark-red: #7B241C;
+    --blue: #1A5276;
+    --dark-blue: #154360;
+    --bg-dark: #0D0D0D;
+    --bg-panel: #1A1A2E;
+    --text-white: #F8F9FA;
+    --green: #27AE60;
+    --orange: #E67E22;
+    --purple: #8E44AD;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-dark);
+    font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 480px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0a0a1a 0%, #0D0D2B 50%, #1a0a0a 100%);
+  }
+
+  /* ── 星空背景 ── */
+  #stars {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--d, 2s) infinite alternate;
+  }
+  @keyframes twinkle {
+    from { opacity: 0.2; transform: scale(1); }
+    to   { opacity: 1;   transform: scale(1.3); }
+  }
+
+  /* ── 屏幕层 ── */
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 10;
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+  /* ══════════════════ 开始屏 ══════════════════ */
+  #screen-start {
+    gap: 0;
+    background: radial-gradient(ellipse at center, #1a0030 0%, #0a0015 70%);
+  }
+
+  .title-wrap {
+    text-align: center;
+    margin-bottom: 10px;
+    animation: floatTitle 3s ease-in-out infinite;
+  }
+  @keyframes floatTitle {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  .title-cn {
+    font-size: 52px;
+    background: linear-gradient(135deg, #FFD700, #FF6B35, #FFD700);
+    background-size: 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 6px;
+    text-shadow: none;
+    filter: drop-shadow(0 0 20px rgba(255,200,0,0.6));
+    animation: shimmer 2s linear infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .title-sub {
+    color: #aaa;
+    font-size: 14px;
+    letter-spacing: 3px;
+    margin-top: 4px;
+  }
+
+  .vs-preview {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+  }
+  .vs-text {
+    font-size: 36px;
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold);
+    animation: vsPulse 1s ease-in-out infinite;
+  }
+  @keyframes vsPulse {
+    0%,100% { transform: scale(1); text-shadow: 0 0 10px var(--gold); }
+    50%      { transform: scale(1.2); text-shadow: 0 0 30px var(--gold); }
+  }
+
+  .start-char {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .start-char-name {
+    font-size: 13px;
+    color: #ddd;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .start-char-role {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 2px;
+  }
+  .role-archer { background: rgba(192,57,43,0.3); color: #e74c3c; border: 1px solid #c0392b; }
+  .role-warrior { background: rgba(26,82,118,0.3); color: #3498db; border: 1px solid #1a5276; }
+
+  .btn-start {
+    background: linear-gradient(135deg, #B8860B, #FFD700, #B8860B);
+    color: #1a0030;
+    border: none;
+    padding: 16px 60px;
+    font-size: 22px;
+    font-family: inherit;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 4px;
+    margin-top: 10px;
+    box-shadow: 0 0 30px rgba(255,215,0,0.5);
+    animation: btnGlow 2s ease-in-out infinite;
+    transition: transform 0.1s;
+  }
+  .btn-start:active { transform: scale(0.95); }
+  @keyframes btnGlow {
+    0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+    50%      { box-shadow: 0 0 50px rgba(255,215,0,0.9); }
+  }
+
+  .tips {
+    color: #555;
+    font-size: 12px;
+    margin-top: 20px;
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  /* ══════════════════ 战斗屏 ══════════════════ */
+  #screen-battle {
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  /* 顶部HP栏 */
+  .hp-bars {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px 10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+    z-index: 20;
+    position: relative;
+  }
+  .hp-card {
+    width: 47%;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .hp-card.archer { border-color: rgba(192,57,43,0.5); }
+  .hp-card.warrior { border-color: rgba(26,82,118,0.5); }
+  .hp-name {
+    font-size: 13px;
+    color: #eee;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .hp-name .role-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .archer .role-badge { background: #c0392b; }
+  .warrior .role-badge { background: #1a5276; }
+  .hp-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hp-bar-bg {
+    flex: 1;
+    height: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .hp-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+  }
+  .archer .hp-bar-fill { background: linear-gradient(90deg, #e74c3c, #ff7675); }
+  .warrior .hp-bar-fill { background: linear-gradient(90deg, #2980b9, #74b9ff); }
+  .hp-num {
+    font-size: 11px;
+    color: #ccc;
+    min-width: 52px;
+    text-align: right;
+  }
+  .mp-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 3px;
+  }
+  .mp-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+    background: linear-gradient(90deg, #8e44ad, #a29bfe);
+  }
+  .mp-num {
+    font-size: 10px;
+    color: #a29bfe;
+    min-width: 52px;
+    text-align: right;
+    margin-top: 3px;
+  }
+
+  /* 战场 */
+  .battlefield {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    padding-bottom: 10px;
+    overflow: hidden;
+  }
+
+  /* 地面 */
+  .ground {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, rgba(100,60,20,0.3));
+    border-top: 2px solid rgba(255,215,0,0.2);
+  }
+  .ground-line {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  /* 角色容器 */
+  .char-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    z-index: 5;
+    transition: transform 0.3s;
+  }
+  .char-wrap.shake {
+    animation: shake 0.4s ease;
+  }
+  .char-wrap.attacking {
+    animation: attackMove 0.4s ease;
+  }
+  .warrior-wrap.attacking {
+    animation: attackMoveRight 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px) rotate(-5deg); }
+    40%      { transform: translateX(8px)  rotate(5deg); }
+    60%      { transform: translateX(-6px) rotate(-3deg); }
+    80%      { transform: translateX(6px)  rotate(3deg); }
+  }
+  @keyframes attackMove {
+    0%   { transform: translateX(0); }
+    40%  { transform: translateX(50px) scale(1.1); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes attackMoveRight {
+    0%   { transform: translateX(0) scaleX(-1); }
+    40%  { transform: translateX(-50px) scaleX(-1.1); }
+    100% { transform: translateX(0) scaleX(-1); }
+  }
+
+  .warrior-wrap { transform: scaleX(-1); }
+  .warrior-wrap .char-name { transform: scaleX(-1); }
+
+  .char-name {
+    font-size: 12px;
+    color: var(--gold);
+    background: rgba(0,0,0,0.5);
+    padding: 2px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .char-shadow {
+    width: 70px;
+    height: 12px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%);
+    border-radius: 50%;
+    margin-top: -5px;
+  }
+
+  /* 效果文字浮现 */
+  .damage-float {
+    position: absolute;
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: none;
+    animation: floatUp 1.2s ease-out forwards;
+    z-index: 100;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  }
+  .damage-float.dmg  { color: #ff6b6b; }
+  .damage-float.heal { color: #55efc4; }
+  .damage-float.mp   { color: #a29bfe; }
+  .damage-float.miss { color: #fdcb6e; font-size: 18px; }
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0)    scale(1); }
+    20%  { opacity: 1; transform: translateY(-20px) scale(1.3); }
+    100% { opacity: 0; transform: translateY(-70px) scale(0.8); }
+  }
+
+  /* 技能特效 */
+  .skill-fx {
+    position: absolute;
+    pointer-events: none;
+    z-index: 50;
+    font-size: 40px;
+    animation: fxFly 0.6s ease-in-out forwards;
+  }
+  @keyframes fxFly {
+    0%   { opacity: 0; transform: scale(0); }
+    30%  { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(0.5) translateY(-30px); }
+  }
+
+  /* 回合指示 */
+  .turn-indicator {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,100,0,0.2));
+    border: 1px solid rgba(255,215,0,0.5);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 12px;
+    color: var(--gold);
+    white-space: nowrap;
+    z-index: 20;
+  }
+
+  /* 底部日志 + 技能区 */
+  .bottom-panel {
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.9) 20%);
+    padding: 0 12px 12px;
+    z-index: 20;
+    position: relative;
+  }
+
+  /* 战斗日志 */
+  .battle-log {
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 10px;
+    padding: 8px 10px;
+    height: 68px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    scrollbar-width: none;
+  }
+  .battle-log::-webkit-scrollbar { display: none; }
+  .log-entry {
+    font-size: 12px;
+    color: #ccc;
+    line-height: 1.7;
+    padding: 0;
+  }
+  .log-entry.important { color: var(--gold); }
+  .log-entry.damage-log { color: #ff7675; }
+  .log-entry.heal-log { color: #55efc4; }
+  .log-entry.system-log { color: #aaa; font-size: 11px; }
+
+  /* 技能按钮区 */
+  .skill-panel {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .skill-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-btn:active { transform: scale(0.97); }
+  .skill-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
+    border-radius: inherit;
+  }
+  .skill-btn.red   { border-color: rgba(192,57,43,0.5); }
+  .skill-btn.blue  { border-color: rgba(26,82,118,0.5); }
+  .skill-btn.gold  { border-color: rgba(255,215,0,0.5); }
+  .skill-btn.green { border-color: rgba(39,174,96,0.5); }
+  .skill-btn.disabled { opacity: 0.35; pointer-events: none; }
+  .skill-btn.enemy-turn { opacity: 0.2; pointer-events: none; }
+
+  .skill-icon { font-size: 20px; }
+  .skill-name { font-size: 13px; color: #eee; margin: 2px 0; display: block; }
+  .skill-desc { font-size: 10px; color: #888; display: block; line-height: 1.3; }
+  .skill-cost {
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 10px;
+    color: #a29bfe;
+    background: rgba(162,155,254,0.15);
+    padding: 1px 5px;
+    border-radius: 6px;
+  }
+  .skill-cost.free { color: #55efc4; background: rgba(85,239,196,0.15); }
+
+  /* 状态栏 */
+  .status-effects {
+    display: flex;
+    gap: 4px;
+    min-height: 18px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .status-tag {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 6px;
+  }
+  .status-stun { background: rgba(241,196,15,0.3); color: #f1c40f; }
+  .status-burn { background: rgba(231,76,60,0.3); color: #e74c3c; }
+  .status-shield { background: rgba(52,152,219,0.3); color: #3498db; }
+  .status-rage { background: rgba(231,76,60,0.3); color: #e74c3c; }
+  .status-heal { background: rgba(39,174,96,0.3); color: #27ae60; }
+
+  /* ══════════════════ 结算屏 ══════════════════ */
+  #screen-result {
+    background: radial-gradient(ellipse at center, #1a1000 0%, #0a0a0a 70%);
+  }
+  .result-wrap {
+    text-align: center;
+    padding: 20px;
+  }
+  .result-title {
+    font-size: 42px;
+    color: var(--gold);
+    text-shadow: 0 0 30px var(--gold);
+    margin-bottom: 6px;
+    animation: resultShine 1s ease-in-out infinite alternate;
+  }
+  @keyframes resultShine {
+    from { text-shadow: 0 0 20px var(--gold); }
+    to   { text-shadow: 0 0 60px var(--gold), 0 0 100px #ff6b35; }
+  }
+  .result-winner {
+    font-size: 22px;
+    color: #eee;
+    margin: 10px 0;
+  }
+  .result-winner span { color: var(--gold); }
+  .result-quote {
+    font-size: 14px;
+    color: #888;
+    margin: 10px 0 24px;
+    line-height: 1.8;
+    font-style: italic;
+  }
+  .btn-retry {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: white;
+    border: none;
+    padding: 14px 50px;
+    font-size: 18px;
+    font-family: inherit;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    transition: transform 0.1s;
+    box-shadow: 0 0 20px rgba(39,174,96,0.5);
+  }
+  .btn-retry:active { transform: scale(0.95); }
+
+  /* ── 敌方回合提示 ── */
+  .enemy-thinking {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-size: 14px;
+    color: var(--gold);
+    z-index: 200;
+    display: none;
+    white-space: nowrap;
+  }
+  .enemy-thinking.show { display: block; animation: fadeInOut 0.3s ease; }
+  @keyframes fadeInOut {
+    from { opacity: 0; transform: translate(-50%,-50%) scale(0.8); }
+    to   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  }
+
+  /* 回合数 */
+  .round-badge {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 20px;
+    padding: 2px 12px;
+    font-size: 11px;
+    color: #aaa;
+    z-index: 25;
+    white-space: nowrap;
+  }
+
+  /* 元气不足提示 */
+  .mp-tip {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #a29bfe;
+    white-space: nowrap;
+    animation: tipFade 2s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes tipFade {
+    0%   { opacity: 1; bottom: 0; }
+    100% { opacity: 0; bottom: 20px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 星空 -->
+  <div id="stars"></div>
+
+  <!-- ══ 开始屏 ══ -->
+  <div class="screen" id="screen-start">
+    <div class="title-wrap">
+      <div class="title-cn">辉斌大战</div>
+      <div class="title-sub">⚔ 世纪对决 · 史诗传说 ⚔</div>
+    </div>
+
+    <div class="vs-preview">
+      <div class="start-char">
+        <svg width="80" height="100" viewBox="0 0 80 100">
+          <!-- 钟林辉 射手 -->
+          <!-- 身体 -->
+          <ellipse cx="40" cy="72" rx="22" ry="16" fill="#8B4513"/>
+          <!-- 脚 -->
+          <ellipse cx="30" cy="87" rx="9" ry="7" fill="#5D3A1A"/>
+          <ellipse cx="50" cy="87" rx="9" ry="7" fill="#5D3A1A"/>
+          <!-- 腿 -->
+          <rect x="28" y="76" width="10" height="14" rx="4" fill="#6B3A2A"/>
+          <rect x="42" y="76" width="10" height="14" rx="4" fill="#6B3A2A"/>
+          <!-- 腰带 -->
+          <rect x="18" y="68" width="44" height="7" rx="3" fill="#4A2800"/>
+          <rect x="36" y="69" width="8" height="5" rx="1" fill="#FFD700"/>
+          <!-- 上身 -->
+          <ellipse cx="40" cy="55" rx="20" ry="18" fill="#C0392B"/>
+          <!-- 领子 -->
+          <ellipse cx="40" cy="40" rx="10" ry="6" fill="#E74C3C"/>
+          <!-- 胳膊左 (拿弓) -->
+          <ellipse cx="18" cy="58" rx="7" ry="14" fill="#C0392B" transform="rotate(-15 18 58)"/>
+          <ellipse cx="12" cy="70" rx="5" ry="7" fill="#FDBCB4"/>
+          <!-- 弓 -->
+          <path d="M 8 52 Q 4 65 8 78" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <line x1="8" y1="52" x2="8" y2="78" stroke="#DEB887" stroke-width="1"/>
+          <!-- 箭 -->
+          <line x1="15" y1="63" x2="35" y2="60" stroke="#8B4513" stroke-width="2"/>
+          <polygon points="35,60 30,57 30,63" fill="#C0392B"/>
+          <!-- 胳膊右 -->
+          <ellipse cx="62" cy="58" rx="7" ry="14" fill="#C0392B" transform="rotate(15 62 58)"/>
+          <ellipse cx="68" cy="70" rx="5" ry="7" fill="#FDBCB4"/>
+          <!-- 头 -->
+          <ellipse cx="40" cy="26" rx="18" ry="20" fill="#FDBCB4"/>
+          <!-- 耳朵 -->
+          <ellipse cx="22" cy="26" rx="4" ry="6" fill="#FDBCB4"/>
+          <ellipse cx="58" cy="26" rx="4" ry="6" fill="#FDBCB4"/>
+          <!-- 帽子 -->
+          <ellipse cx="40" cy="10" rx="20" ry="7" fill="#8B0000"/>
+          <rect x="22" y="4" width="36" height="12" rx="5" fill="#9B2335"/>
+          <rect x="30" y="2" width="20" height="8" rx="4" fill="#8B0000"/>
+          <!-- 帽子标志 -->
+          <text x="40" y="10" font-size="7" fill="#FFD700" text-anchor="middle" font-family="serif">射</text>
+          <!-- 眼睛 -->
+          <ellipse cx="32" cy="24" rx="5" ry="6" fill="white"/>
+          <ellipse cx="48" cy="24" rx="5" ry="6" fill="white"/>
+          <ellipse cx="33" cy="25" rx="3" ry="4" fill="#333"/>
+          <ellipse cx="49" cy="25" rx="3" ry="4" fill="#333"/>
+          <!-- 瞳孔-眯眼瞄准 -->
+          <ellipse cx="33" cy="25" rx="1.5" ry="1.5" fill="black"/>
+          <ellipse cx="49" cy="25" rx="1.5" ry="1.5" fill="black"/>
+          <!-- 眉毛 - 皱眉认真 -->
+          <path d="M 27 19 Q 32 17 37 19" stroke="#6B4226" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M 43 19 Q 48 17 53 19" stroke="#6B4226" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- 嘴巴 - 龇牙咧嘴 -->
+          <path d="M 33 34 Q 40 40 47 34" stroke="#C0392B" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <ellipse cx="40" cy="36" rx="6" ry="3" fill="white" opacity="0.5"/>
+          <!-- 腮红 -->
+          <ellipse cx="25" cy="30" rx="5" ry="3" fill="#FFB6C1" opacity="0.5"/>
+          <ellipse cx="55" cy="30" rx="5" ry="3" fill="#FFB6C1" opacity="0.5"/>
+          <!-- 汗珠 -->
+          <ellipse cx="58" cy="18" rx="2" ry="3" fill="#74B9FF" opacity="0.8"/>
+        </svg>
+        <div class="start-char-name">🏹 钟林辉</div>
+        <div class="start-char-role role-archer">射手</div>
+      </div>
+
+      <div class="vs-text">VS</div>
+
+      <div class="start-char">
+        <svg width="80" height="100" viewBox="0 0 80 100">
+          <!-- 兰勇斌 战士 -->
+          <!-- 脚 -->
+          <ellipse cx="30" cy="88" rx="10" ry="7" fill="#1A237E"/>
+          <ellipse cx="50" cy="88" rx="10" ry="7" fill="#1A237E"/>
+          <!-- 腿 - 粗壮 -->
+          <rect x="26" y="74" width="14" height="17" rx="5" fill="#1565C0"/>
+          <rect x="40" y="74" width="14" height="17" rx="5" fill="#1565C0"/>
+          <!-- 裙甲 -->
+          <path d="M18 68 L26 90 L54 90 L62 68 Z" fill="#1A5276" opacity="0.8"/>
+          <!-- 腰带 -->
+          <rect x="16" y="66" width="48" height="8" rx="4" fill="#0D47A1"/>
+          <rect x="35" y="67" width="10" height="6" rx="2" fill="#FFD700"/>
+          <!-- 身体 - 很宽 -->
+          <ellipse cx="40" cy="50" rx="24" ry="20" fill="#1565C0"/>
+          <!-- 胸甲 -->
+          <ellipse cx="40" cy="48" rx="18" ry="15" fill="#1A5276"/>
+          <path d="M 25 40 L 40 30 L 55 40" fill="#0D47A1" stroke="#FFD700" stroke-width="1"/>
+          <!-- 盾牌 (左手) -->
+          <ellipse cx="10" cy="55" rx="10" ry="14" fill="#1565C0" stroke="#FFD700" stroke-width="2"/>
+          <ellipse cx="10" cy="55" rx="7" ry="10" fill="#1A237E"/>
+          <text x="10" y="58" font-size="8" fill="#FFD700" text-anchor="middle">斌</text>
+          <!-- 左臂 -->
+          <ellipse cx="18" cy="55" rx="8" ry="14" fill="#1565C0" transform="rotate(10 18 55)"/>
+          <!-- 右臂 - 举剑 -->
+          <ellipse cx="62" cy="48" rx="8" ry="14" fill="#1565C0" transform="rotate(-20 62 48)"/>
+          <!-- 剑 -->
+          <rect x="66" y="20" width="4" height="30" rx="2" fill="#BDC3C7"/>
+          <rect x="62" y="30" width="12" height="4" rx="2" fill="#F39C12"/>
+          <polygon points="68,20 66,28 70,28" fill="#ECF0F1"/>
+          <!-- 右手 -->
+          <ellipse cx="66" cy="48" rx="5" ry="6" fill="#FDBCB4"/>
+          <!-- 头 - 方形硬汉 -->
+          <rect x="22" y="10" width="36" height="36" rx="10" fill="#FDBCB4"/>
+          <!-- 耳朵 - 大耳朵 -->
+          <ellipse cx="20" cy="27" rx="5" ry="7" fill="#FDBCB4"/>
+          <ellipse cx="60" cy="27" rx="5" ry="7" fill="#FDBCB4"/>
+          <!-- 头盔 -->
+          <ellipse cx="40" cy="12" rx="20" ry="10" fill="#0D47A1"/>
+          <rect x="20" y="8" width="40" height="16" rx="5" fill="#1565C0"/>
+          <rect x="34" y="5" width="12" height="10" rx="4" fill="#0D47A1"/>
+          <!-- 头盔装饰 -->
+          <rect x="38" y="2" width="4" height="8" rx="2" fill="#FFD700"/>
+          <text x="40" y="17" font-size="7" fill="#FFD700" text-anchor="middle" font-family="serif">战</text>
+          <!-- 眉毛 - 超粗 -->
+          <rect x="24" y="22" width="13" height="4" rx="2" fill="#5D3A1A"/>
+          <rect x="43" y="22" width="13" height="4" rx="2" fill="#5D3A1A"/>
+          <!-- 眼睛 - 小眼 -->
+          <ellipse cx="31" cy="29" rx="6" ry="5" fill="white"/>
+          <ellipse cx="49" cy="29" rx="6" ry="5" fill="white"/>
+          <ellipse cx="31" cy="30" rx="4" ry="4" fill="#1A5276"/>
+          <ellipse cx="49" cy="30" rx="4" ry="4" fill="#1A5276"/>
+          <ellipse cx="31" cy="30" rx="2" ry="2" fill="black"/>
+          <ellipse cx="49" cy="30" rx="2" ry="2" fill="black"/>
+          <!-- 胡子 -->
+          <path d="M 26 40 Q 40 47 54 40" stroke="#5D3A1A" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <ellipse cx="33" cy="43" rx="4" ry="3" fill="#5D3A1A" opacity="0.6"/>
+          <ellipse cx="47" cy="43" rx="4" ry="3" fill="#5D3A1A" opacity="0.6"/>
+          <!-- 腮红 -->
+          <ellipse cx="24" cy="35" rx="5" ry="3" fill="#FFB6C1" opacity="0.4"/>
+          <ellipse cx="56" cy="35" rx="5" ry="3" fill="#FFB6C1" opacity="0.4"/>
+        </svg>
+        <div class="start-char-name">⚔️ 兰勇斌</div>
+        <div class="start-char-role role-warrior">战士</div>
+      </div>
+    </div>
+
+    <button class="btn-start" onclick="startGame()">开 战 ！</button>
+
+    <div class="tips">
+      🏹 钟林辉 · 神射手 · 擅长远程攻击<br>
+      ⚔️ 兰勇斌 · 铁血战士 · 近战无敌<br>
+      你扮演 钟林辉 迎战兰勇斌！
+    </div>
+  </div>
+
+  <!-- ══ 战斗屏 ══ -->
+  <div class="screen hidden" id="screen-battle">
+
+    <!-- HP栏 -->
+    <div class="hp-bars">
+      <div class="hp-card archer" id="card-archer">
+        <div class="hp-name">
+          🏹 钟林辉
+          <span class="role-badge">射手</span>
+        </div>
+        <div class="hp-row">
+          <div class="hp-bar-bg"><div class="hp-bar-fill" id="hp-bar-archer" style="width:100%"></div></div>
+          <div class="hp-num" id="hp-num-archer">300/300</div>
+        </div>
+        <div class="hp-row">
+          <div class="mp-bar-bg"><div class="mp-bar-fill" id="mp-bar-archer" style="width:100%"></div></div>
+          <div class="mp-num" id="mp-num-archer">💜 100/100</div>
+        </div>
+        <div class="status-effects" id="status-archer"></div>
+      </div>
+      <div class="hp-card warrior" id="card-warrior">
+        <div class="hp-name">
+          ⚔️ 兰勇斌
+          <span class="role-badge">战士</span>
+        </div>
+        <div class="hp-row">
+          <div class="hp-bar-bg"><div class="hp-bar-fill" id="hp-bar-warrior" style="width:100%"></div></div>
+          <div class="hp-num" id="hp-num-warrior">400/400</div>
+        </div>
+        <div class="hp-row">
+          <div class="mp-bar-bg"><div class="mp-bar-fill" id="mp-bar-warrior" style="width:100%"></div></div>
+          <div class="mp-num" id="mp-num-warrior">💜 80/80</div>
+        </div>
+        <div class="status-effects" id="status-warrior"></div>
+      </div>
+    </div>
+
+    <!-- 回合徽章 -->
+    <div class="round-badge" id="round-badge">第 1 回合</div>
+
+    <!-- 战场 -->
+    <div class="battlefield" id="battlefield">
+      <div class="turn-indicator" id="turn-indicator">⚡ 你的回合</div>
+
+      <!-- 钟林辉 -->
+      <div class="char-wrap" id="char-archer">
+        <div class="char-name">钟林辉</div>
+        <svg id="svg-archer" width="90" height="115" viewBox="0 0 80 100">
+          <ellipse cx="40" cy="72" rx="22" ry="16" fill="#8B4513"/>
+          <ellipse cx="30" cy="87" rx="9" ry="7" fill="#5D3A1A"/>
+          <ellipse cx="50" cy="87" rx="9" ry="7" fill="#5D3A1A"/>
+          <rect x="28" y="76" width="10" height="14" rx="4" fill="#6B3A2A"/>
+          <rect x="42" y="76" width="10" height="14" rx="4" fill="#6B3A2A"/>
+          <rect x="18" y="68" width="44" height="7" rx="3" fill="#4A2800"/>
+          <rect x="36" y="69" width="8" height="5" rx="1" fill="#FFD700"/>
+          <ellipse cx="40" cy="55" rx="20" ry="18" fill="#C0392B"/>
+          <ellipse cx="40" cy="40" rx="10" ry="6" fill="#E74C3C"/>
+          <ellipse cx="18" cy="58" rx="7" ry="14" fill="#C0392B" transform="rotate(-15 18 58)"/>
+          <ellipse cx="12" cy="70" rx="5" ry="7" fill="#FDBCB4"/>
+          <path d="M 8 52 Q 4 65 8 78" stroke="#8B4513" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <line x1="8" y1="52" x2="8" y2="78" stroke="#DEB887" stroke-width="1"/>
+          <line x1="15" y1="63" x2="35" y2="60" stroke="#8B4513" stroke-width="2"/>
+          <polygon points="35,60 30,57 30,63" fill="#C0392B"/>
+          <ellipse cx="62" cy="58" rx="7" ry="14" fill="#C0392B" transform="rotate(15 62 58)"/>
+          <ellipse cx="68" cy="70" rx="5" ry="7" fill="#FDBCB4"/>
+          <ellipse cx="40" cy="26" rx="18" ry="20" fill="#FDBCB4"/>
+          <ellipse cx="22" cy="26" rx="4" ry="6" fill="#FDBCB4"/>
+          <ellipse cx="58" cy="26" rx="4" ry="6" fill="#FDBCB4"/>
+          <ellipse cx="40" cy="10" rx="20" ry="7" fill="#8B0000"/>
+          <rect x="22" y="4" width="36" height="12" rx="5" fill="#9B2335"/>
+          <rect x="30" y="2" width="20" height="8" rx="4" fill="#8B0000"/>
+          <text x="40" y="10" font-size="7" fill="#FFD700" text-anchor="middle" font-family="serif">射</text>
+          <ellipse cx="32" cy="24" rx="5" ry="6" fill="white"/>
+          <ellipse cx="48" cy="24" rx="5" ry="6" fill="white"/>
+          <ellipse cx="33" cy="25" rx="3" ry="4" fill="#333"/>
+          <ellipse cx="49" cy="25" rx="3" ry="4" fill="#333"/>
+          <ellipse cx="33" cy="25" rx="1.5" ry="1.5" fill="black"/>
+          <ellipse cx="49" cy="25" rx="1.5" ry="1.5" fill="black"/>
+          <path d="M 27 19 Q 32 17 37 19" stroke="#6B4226" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M 43 19 Q 48 17 53 19" stroke="#6B4226" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M 33 34 Q 40 40 47 34" stroke="#C0392B" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <ellipse cx="25" cy="30" rx="5" ry="3" fill="#FFB6C1" opacity="0.5"/>
+          <ellipse cx="55" cy="30" rx="5" ry="3" fill="#FFB6C1" opacity="0.5"/>
+          <ellipse cx="58" cy="18" rx="2" ry="3" fill="#74B9FF" opacity="0.8"/>
+        </svg>
+        <div class="char-shadow"></div>
+      </div>
+
+      <!-- 兰勇斌 -->
+      <div class="char-wrap warrior-wrap" id="char-warrior">
+        <div class="char-name">兰勇斌</div>
+        <svg id="svg-warrior" width="90" height="115" viewBox="0 0 80 100">
+          <ellipse cx="30" cy="88" rx="10" ry="7" fill="#1A237E"/>
+          <ellipse cx="50" cy="88" rx="10" ry="7" fill="#1A237E"/>
+          <rect x="26" y="74" width="14" height="17" rx="5" fill="#1565C0"/>
+          <rect x="40" y="74" width="14" height="17" rx="5" fill="#1565C0"/>
+          <path d="M18 68 L26 90 L54 90 L62 68 Z" fill="#1A5276" opacity="0.8"/>
+          <rect x="16" y="66" width="48" height="8" rx="4" fill="#0D47A1"/>
+          <rect x="35" y="67" width="10" height="6" rx="2" fill="#FFD700"/>
+          <ellipse cx="40" cy="50" rx="24" ry="20" fill="#1565C0"/>
+          <ellipse cx="40" cy="48" rx="18" ry="15" fill="#1A5276"/>
+          <path d="M 25 40 L 40 30 L 55 40" fill="#0D47A1" stroke="#FFD700" stroke-width="1"/>
+          <ellipse cx="10" cy="55" rx="10" ry="14" fill="#1565C0" stroke="#FFD700" stroke-width="2"/>
+          <ellipse cx="10" cy="55" rx="7" ry="10" fill="#1A237E"/>
+          <text x="10" y="58" font-size="8" fill="#FFD700" text-anchor="middle">斌</text>
+          <ellipse cx="18" cy="55" rx="8" ry="14" fill="#1565C0" transform="rotate(10 18 55)"/>
+          <ellipse cx="62" cy="48" rx="8" ry="14" fill="#1565C0" transform="rotate(-20 62 48)"/>
+          <rect x="66" y="20" width="4" height="30" rx="2" fill="#BDC3C7"/>
+          <rect x="62" y="30" width="12" height="4" rx="2" fill="#F39C12"/>
+          <polygon points="68,20 66,28 70,28" fill="#ECF0F1"/>
+          <ellipse cx="66" cy="48" rx="5" ry="6" fill="#FDBCB4"/>
+          <rect x="22" y="10" width="36" height="36" rx="10" fill="#FDBCB4"/>
+          <ellipse cx="20" cy="27" rx="5" ry="7" fill="#FDBCB4"/>
+          <ellipse cx="60" cy="27" rx="5" ry="7" fill="#FDBCB4"/>
+          <ellipse cx="40" cy="12" rx="20" ry="10" fill="#0D47A1"/>
+          <rect x="20" y="8" width="40" height="16" rx="5" fill="#1565C0"/>
+          <rect x="34" y="5" width="12" height="10" rx="4" fill="#0D47A1"/>
+          <rect x="38" y="2" width="4" height="8" rx="2" fill="#FFD700"/>
+          <text x="40" y="17" font-size="7" fill="#FFD700" text-anchor="middle" font-family="serif">战</text>
+          <rect x="24" y="22" width="13" height="4" rx="2" fill="#5D3A1A"/>
+          <rect x="43" y="22" width="13" height="4" rx="2" fill="#5D3A1A"/>
+          <ellipse cx="31" cy="29" rx="6" ry="5" fill="white"/>
+          <ellipse cx="49" cy="29" rx="6" ry="5" fill="white"/>
+          <ellipse cx="31" cy="30" rx="4" ry="4" fill="#1A5276"/>
+          <ellipse cx="49" cy="30" rx="4" ry="4" fill="#1A5276"/>
+          <ellipse cx="31" cy="30" rx="2" ry="2" fill="black"/>
+          <ellipse cx="49" cy="30" rx="2" ry="2" fill="black"/>
+          <path d="M 26 40 Q 40 47 54 40" stroke="#5D3A1A" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <ellipse cx="33" cy="43" rx="4" ry="3" fill="#5D3A1A" opacity="0.6"/>
+          <ellipse cx="47" cy="43" rx="4" ry="3" fill="#5D3A1A" opacity="0.6"/>
+          <ellipse cx="24" cy="35" rx="5" ry="3" fill="#FFB6C1" opacity="0.4"/>
+          <ellipse cx="56" cy="35" rx="5" ry="3" fill="#FFB6C1" opacity="0.4"/>
+        </svg>
+        <div class="char-shadow"></div>
+      </div>
+
+      <!-- 地面 -->
+      <div class="ground"><div class="ground-line"></div></div>
+
+      <!-- 敌方思考提示 -->
+      <div class="enemy-thinking" id="enemy-thinking">🤔 兰勇斌 正在思考...</div>
+    </div>
+
+    <!-- 底部面板 -->
+    <div class="bottom-panel">
+      <div class="battle-log" id="battle-log">
+        <div class="log-entry important">⚔️ 辉斌大战 · 史诗对决开始！</div>
+        <div class="log-entry system-log">钟林辉站在山坡上，拉开了他那把祖传的竹弓...</div>
+        <div class="log-entry system-log">兰勇斌甩了甩他油腻的头发，咆哮着冲了过来！</div>
+      </div>
+      <div class="skill-panel" id="skill-panel">
+        <button class="skill-btn red" onclick="useSkill('normal')">
+          <div class="skill-icon">🏹</div>
+          <span class="skill-name">普通射击</span>
+          <span class="skill-desc">发射一支普通箭矢</span>
+          <span class="skill-cost free">免费</span>
+        </button>
+        <button class="skill-btn gold" onclick="useSkill('aimed')">
+          <div class="skill-icon">🎯</div>
+          <span class="skill-name">精准狙击</span>
+          <span class="skill-desc">瞄准要害，伤害极高</span>
+          <span class="skill-cost">20 MP</span>
+        </button>
+        <button class="skill-btn green" onclick="useSkill('heal')">
+          <div class="skill-icon">🍖</div>
+          <span class="skill-name">吃鸡腿</span>
+          <span class="skill-desc">掏出秘制鸡腿大口啃</span>
+          <span class="skill-cost">15 MP</span>
+        </button>
+        <button class="skill-btn" style="border-color:rgba(142,68,173,0.5)" onclick="useSkill('volley')">
+          <div class="skill-icon">🌪️</div>
+          <span class="skill-name">箭雨乱舞</span>
+          <span class="skill-desc">连射三箭，乱中取胜</span>
+          <span class="skill-cost">35 MP</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 结算屏 ══ -->
+  <div class="screen hidden" id="screen-result">
+    <div class="result-wrap">
+      <div class="result-title" id="result-title">🏆 胜利！</div>
+      <div class="result-winner" id="result-winner">钟林辉 赢了！</div>
+      <div class="result-quote" id="result-quote">"我的箭从不说谎！"</div>
+      <div style="font-size:80px; margin: 10px 0;" id="result-emoji">🎉</div>
+      <button class="btn-retry" onclick="retryGame()">再 战 一 局</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════ 游戏数据 ══════════
+const INIT = {
+  archer:  { name:'钟林辉', hp:300, maxHp:300, mp:100, maxMp:100, atk:45, def:15 },
+  warrior: { name:'兰勇斌', hp:400, maxHp:400, mp:80,  maxMp:80,  atk:55, def:20 }
+};
+
+// 技能定义
+const ARCHER_SKILLS = {
+  normal: {
+    name:'普通射击', mpCost:0,
+    exec(a,b){ 
+      const dmg = calc(a.atk, b.def, 0.9, 1.1);
+      const crit = Math.random() < 0.15;
+      return { dmg: crit ? Math.floor(dmg*1.8) : dmg, crit, msg: crit ? `🎯 暴击！钟林辉射出致命一箭` : `🏹 钟林辉射出一箭` };
+    }
+  },
+  aimed: {
+    name:'精准狙击', mpCost:20,
+    exec(a,b){ 
+      const dmg = calc(a.atk, b.def, 1.5, 2.0);
+      return { dmg, msg:`🎯 钟林辉深呼一口气，精准射中要害` };
+    }
+  },
+  heal: {
+    name:'吃鸡腿', mpCost:15,
+    exec(a,b){ 
+      const h = Math.floor(a.maxHp * 0.18 + rand(0,20));
+      return { heal:h, msg:`🍖 钟林辉掏出秘制鸡腿，大口啃了起来！` };
+    }
+  },
+  volley: {
+    name:'箭雨乱舞', mpCost:35,
+    exec(a,b){ 
+      let total = 0;
+      const shots = 3;
+      const parts = [];
+      for(let i=0;i<shots;i++){
+        if(Math.random()<0.15){ parts.push('✗'); continue; }
+        const d = calc(a.atk, b.def, 0.5, 0.9);
+        total += d; parts.push(d);
+      }
+      return { dmg:total, msg:`🌪️ 钟林辉连射三箭！[${parts.join(',')}]` };
+    }
+  }
+};
+
+const WARRIOR_SKILLS = [
+  { name:'怒劈', icon:'⚔️', mpCost:0,
+    exec(a,b){ 
+      const dmg = calc(a.atk, b.def, 0.9, 1.2);
+      const msgs = ['兰勇斌猛地挥起大剑！','兰勇斌吼了一声冲过来！','兰勇斌的胡子都竖起来了！'];
+      return { dmg, msg:`⚔️ ${pick(msgs)}` };
+    }
+  },
+  { name:'盾击', icon:'🛡️', mpCost:10,
+    exec(a,b){ 
+      const dmg = calc(a.atk, b.def, 0.6, 0.8);
+      return { dmg, stun:Math.random()<0.3, msg:`🛡️ 兰勇斌用盾牌猛砸过来！` };
+    }
+  },
+  { name:'狂怒', icon:'🔥', mpCost:20,
+    exec(a,b){ 
+      const dmg = calc(a.atk, b.def, 1.8, 2.5);
+      return { dmg, msg:`🔥 兰勇斌进入狂暴状态，发出野兽般的嚎叫！` };
+    }
+  },
+  { name:'回血', icon:'💊', mpCost:15,
+    exec(a,b){ 
+      const h = Math.floor(a.maxHp*0.12 + rand(0,15));
+      return { heal:h, msg:`💊 兰勇斌往嘴里塞了颗不明药丸，眼神变得更加迷离...` };
+    }
+  }
+];
+
+// ══════════ 状态 ══════════
+let gs = {};
+let round = 1;
+let isPlayerTurn = true;
+let gameOver = false;
+let locked = false;
+
+function initState() {
+  gs = {
+    archer:  {...INIT.archer,  status:[]},
+    warrior: {...INIT.warrior, status:[]}
+  };
+  round = 1; isPlayerTurn = true; gameOver = false; locked = false;
+}
+
+// ══════════ 工具函数 ══════════
+function calc(atk, def, minR, maxR) {
+  const base = Math.max(1, atk - def * 0.5);
+  return Math.floor(base * (minR + Math.random()*(maxR-minR)));
+}
+function rand(a,b){ return Math.floor(a + Math.random()*(b-a)); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+
+// ══════════ UI 更新 ══════════
+function updateUI() {
+  // 钟林辉
+  const a = gs.archer;
+  document.getElementById('hp-bar-archer').style.width = (a.hp/a.maxHp*100)+'%';
+  document.getElementById('hp-num-archer').textContent = a.hp+'/'+a.maxHp;
+  document.getElementById('mp-bar-archer').style.width = (a.mp/a.maxMp*100)+'%';
+  document.getElementById('mp-num-archer').textContent = '💜 '+a.mp+'/'+a.maxMp;
+  renderStatus('status-archer', a.status);
+
+  // 兰勇斌
+  const w = gs.warrior;
+  document.getElementById('hp-bar-warrior').style.width = (w.hp/w.maxHp*100)+'%';
+  document.getElementById('hp-num-warrior').textContent = w.hp+'/'+w.maxHp;
+  document.getElementById('mp-bar-warrior').style.width = (w.mp/w.maxMp*100)+'%';
+  document.getElementById('mp-num-warrior').textContent = '💜 '+w.mp+'/'+w.maxMp;
+  renderStatus('status-warrior', w.status);
+
+  // 回合
+  document.getElementById('round-badge').textContent = '第 '+round+' 回合';
+  document.getElementById('turn-indicator').textContent = isPlayerTurn ? '⚡ 你的回合' : '💀 敌方回合';
+
+  // 技能按钮状态
+  document.querySelectorAll('.skill-btn').forEach(btn => {
+    btn.classList.toggle('enemy-turn', !isPlayerTurn || locked);
+  });
+  // MP检查
+  const btnAimed = document.querySelectorAll('.skill-btn')[1];
+  const btnHeal  = document.querySelectorAll('.skill-btn')[2];
+  const btnVol   = document.querySelectorAll('.skill-btn')[3];
+  btnAimed.classList.toggle('disabled', a.mp < 20 && isPlayerTurn);
+  btnHeal.classList.toggle('disabled',  a.mp < 15 && isPlayerTurn);
+  btnVol.classList.toggle('disabled',   a.mp < 35 && isPlayerTurn);
+}
+
+function renderStatus(id, statuses) {
+  const el = document.getElementById(id);
+  el.innerHTML = statuses.map(s => {
+    const cls = {stun:'status-stun', burn:'status-burn', shield:'status-shield', rage:'status-rage', regen:'status-heal'}[s.type]||'';
+    const icon = {stun:'💫', burn:'🔥', shield:'🛡️', rage:'😡', regen:'💚'}[s.type]||'✨';
+    return `<span class="status-tag ${cls}">${icon}${s.name}×${s.turns}</span>`;
+  }).join('');
+}
+
+function addLog(msg, cls='') {
+  const log = document.getElementById('battle-log');
+  const div = document.createElement('div');
+  div.className = 'log-entry '+(cls||'');
+  div.textContent = msg;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+  // 最多保留30条
+  while(log.children.length > 30) log.removeChild(log.firstChild);
+}
+
+function showDamage(el, text, type='dmg') {
+  const bf = document.getElementById('battlefield');
+  const r1 = bf.getBoundingClientRect();
+  const r2 = el.getBoundingClientRect();
+  const div = document.createElement('div');
+  div.className = 'damage-float '+type;
+  div.textContent = text;
+  div.style.left = (r2.left - r1.left + r2.width/2 - 20) + 'px';
+  div.style.top  = (r2.top  - r1.top  - 20) + 'px';
+  bf.appendChild(div);
+  setTimeout(()=> div.remove(), 1200);
+}
+
+// ══════════ 游戏逻辑 ══════════
+function useSkill(key) {
+  if (!isPlayerTurn || locked || gameOver) return;
+  const skill = ARCHER_SKILLS[key];
+  if (!skill) return;
+  if (gs.archer.mp < skill.mpCost) {
+    addLog('💜 元气不足，无法使用 '+skill.name+'！', 'system-log');
+    return;
+  }
+
+  locked = true;
+  gs.archer.mp -= skill.mpCost;
+  updateUI();
+
+  // 眩晕检查
+  const stunStatus = gs.archer.status.find(s=>s.type==='stun');
+  if (stunStatus) {
+    addLog('💫 钟林辉被眩晕了，发呆了一回合！', 'system-log');
+    tickStatuses(gs.archer);
+    endPlayerTurn();
+    return;
+  }
+
+  const el = document.getElementById('char-archer');
+  el.classList.add('attacking');
+  el.addEventListener('animationend', ()=> el.classList.remove('attacking'), {once:true});
+
+  const result = skill.exec(gs.archer, gs.warrior);
+  addLog(result.msg, 'important');
+
+  if (result.dmg > 0) {
+    const actual = applyDamage(gs.warrior, result.dmg);
+    if (result.crit) addLog('💥 暴击！造成 '+actual+' 点伤害！', 'damage-log');
+    else             addLog('💢 造成 '+actual+' 点伤害！', 'damage-log');
+    const we = document.getElementById('char-warrior');
+    we.classList.add('shake');
+    we.addEventListener('animationend', ()=> we.classList.remove('shake'), {once:true});
+    showDamage(we, result.crit ? '💥'+actual : '-'+actual, 'dmg');
+
+    // 额外MP
+    gs.archer.mp = clamp(gs.archer.mp + 5, 0, gs.archer.maxMp);
+  }
+  if (result.heal > 0) {
+    gs.archer.hp = clamp(gs.archer.hp + result.heal, 0, gs.archer.maxHp);
+    addLog('💚 恢复了 '+result.heal+' 点生命！', 'heal-log');
+    showDamage(document.getElementById('char-archer'), '+'+result.heal, 'heal');
+  }
+
+  tickStatuses(gs.archer);
+
+  if (checkWin()) return;
+  updateUI();
+  endPlayerTurn();
+}
+
+function applyDamage(target, rawDmg) {
+  const shieldStatus = target.status.find(s=>s.type==='shield');
+  let actual = rawDmg;
+  if (shieldStatus) { actual = Math.floor(rawDmg * 0.4); }
+  actual = Math.max(1, actual);
+  target.hp = clamp(target.hp - actual, 0, target.maxHp);
+  return actual;
+}
+
+function endPlayerTurn() {
+  isPlayerTurn = false;
+  updateUI();
+  if (checkWin()) return;
+
+  const thinkEl = document.getElementById('enemy-thinking');
+  const thinkMsgs = ['🤔 兰勇斌 正在思考...','😤 兰勇斌 暴跳如雷中...','💪 兰勇斌 运气蓄力...'];
+  thinkEl.textContent = pick(thinkMsgs);
+  thinkEl.classList.add('show');
+
+  const delay = 1200 + rand(0,600);
+  setTimeout(()=> {
+    thinkEl.classList.remove('show');
+    enemyTurn();
+  }, delay);
+}
+
+function enemyTurn() {
+  if (gameOver) return;
+
+  // 眩晕检查
+  const stunStatus = gs.warrior.status.find(s=>s.type==='stun');
+  if (stunStatus) {
+    addLog('💫 兰勇斌 被眩晕了，傻站在原地！', 'system-log');
+    tickStatuses(gs.warrior);
+    endEnemyTurn(); return;
+  }
+
+  // AI决策
+  const hpRatio = gs.warrior.hp / gs.warrior.maxHp;
+  let skillIdx;
+  if (hpRatio < 0.25 && gs.warrior.mp >= 15) {
+    skillIdx = 3; // 回血
+  } else if (gs.warrior.mp >= 20 && Math.random() < 0.4) {
+    skillIdx = Math.random() < 0.5 ? 2 : 1; // 狂怒 or 盾击
+  } else {
+    skillIdx = 0; // 普攻
+  }
+  // MP 不足回退
+  while (gs.warrior.mp < WARRIOR_SKILLS[skillIdx].mpCost && skillIdx > 0) skillIdx--;
+
+  const skill = WARRIOR_SKILLS[skillIdx];
+  gs.warrior.mp -= skill.mpCost;
+
+  const el = document.getElementById('char-warrior');
+  el.classList.add('attacking');
+  el.addEventListener('animationend', ()=> el.classList.remove('attacking'), {once:true});
+
+  const result = skill.exec(gs.warrior, gs.archer);
+  addLog(result.msg, 'important');
+
+  if (result.dmg > 0) {
+    const actual = applyDamage(gs.archer, result.dmg);
+    addLog('💢 钟林辉受到了 '+actual+' 点伤害！', 'damage-log');
+    const ae = document.getElementById('char-archer');
+    ae.classList.add('shake');
+    ae.addEventListener('animationend', ()=> ae.classList.remove('shake'), {once:true});
+    showDamage(ae, '-'+actual, 'dmg');
+    gs.warrior.mp = clamp(gs.warrior.mp + 5, 0, gs.warrior.maxMp);
+  }
+  if (result.heal > 0) {
+    gs.warrior.hp = clamp(gs.warrior.hp + result.heal, 0, gs.warrior.maxHp);
+    addLog('💚 兰勇斌恢复了 '+result.heal+' 点生命！', 'heal-log');
+    showDamage(document.getElementById('char-warrior'), '+'+result.heal, 'heal');
+  }
+  if (result.stun) {
+    addLog('💫 钟林辉被击晕了！下回合无法行动！', 'damage-log');
+    gs.archer.status.push({type:'stun', name:'眩晕', turns:1});
+  }
+
+  tickStatuses(gs.warrior);
+  if (checkWin()) return;
+
+  updateUI();
+  endEnemyTurn();
+}
+
+function endEnemyTurn() {
+  round++;
+  // 回合MP自然回复
+  gs.archer.mp  = clamp(gs.archer.mp  + 8, 0, gs.archer.maxMp);
+  gs.warrior.mp = clamp(gs.warrior.mp + 6, 0, gs.warrior.maxMp);
+  isPlayerTurn = true;
+  locked = false;
+  updateUI();
+  addLog(`── 第 ${round} 回合 ──`, 'system-log');
+}
+
+function tickStatuses(char) {
+  char.status = char.status
+    .map(s => ({...s, turns: s.turns - 1}))
+    .filter(s => s.turns > 0);
+}
+
+function checkWin() {
+  if (gs.archer.hp <= 0 || gs.warrior.hp <= 0) {
+    gameOver = true;
+    locked = true;
+    updateUI();
+    setTimeout(showResult, 1000);
+    return true;
+  }
+  return false;
+}
+
+function showResult() {
+  const win = gs.warrior.hp <= 0;
+  document.getElementById('result-title').textContent  = win ? '🏆 胜 利！' : '💀 失 败！';
+  document.getElementById('result-emoji').textContent   = win ? '🎉' : '😭';
+
+  const winnerMsgs = [
+    '"我的箭从不说谎！" —— 钟林辉',
+    '"兰勇斌，下次再来过！" —— 钟林辉',
+    '"射箭？那是我的本命技能！" —— 钟林辉'
+  ];
+  const loseMsgs = [
+    '"哎呀，弦断了..." —— 钟林辉',
+    '"是那根竹弓不行！" —— 钟林辉',
+    '"下次我一定带两把弓！" —— 钟林辉'
+  ];
+  const wWarriorMsgs = [
+    '"哈哈哈，就凭你那根破竹棍？" —— 兰勇斌',
+    '"躲什么！让我再砍两刀！" —— 兰勇斌',
+    '"我的剑从不留情面！" —— 兰勇斌'
+  ];
+
+  document.getElementById('result-winner').innerHTML = win
+    ? `<span>钟林辉</span> 赢了！`
+    : `<span>兰勇斌</span> 赢了！`;
+  document.getElementById('result-quote').textContent = win
+    ? pick(winnerMsgs)
+    : pick(wWarriorMsgs);
+
+  showScreen('result');
+}
+
+// ══════════ 屏幕切换 ══════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('screen-'+name).classList.remove('hidden');
+}
+
+function startGame() {
+  initState();
+  document.getElementById('battle-log').innerHTML = `
+    <div class="log-entry important">⚔️ 辉斌大战 · 史诗对决开始！</div>
+    <div class="log-entry system-log">钟林辉站在山坡上，缓缓拉开了他那把祖传竹弓...</div>
+    <div class="log-entry system-log">兰勇斌甩了甩油腻头发，龇牙咧嘴冲了过来！</div>
+    <div class="log-entry system-log">── 第 1 回合 ──</div>`;
+  updateUI();
+  showScreen('battle');
+}
+
+function retryGame() {
+  showScreen('start');
+}
+
+// ══════════ 星空生成 ══════════
+function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    star.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      width:${size}px;
+      height:${size}px;
+      --d:${(Math.random()*2+1).toFixed(1)}s;
+      animation-delay:${(Math.random()*2).toFixed(1)}s;
+    `;
+    container.appendChild(star);
+  }
+}
+
+createStars();
+</script>
+</body>
+</html>
